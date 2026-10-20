@@ -34,7 +34,6 @@ async function loadArtifact(page: Page) {
 function artifactSnapshot(args: { book: Record<string, string[][]>; dates: string[] }) {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   // Globals of the artifact's classic script (const bindings are not window properties: use indirect eval).
-  // eslint-disable-next-line no-eval
   const g = (name: string): any => (0, eval)(name);
   const [extract, joinExtras, parseAttached, norm, counts, units, inUnit, longStays, closedSoon, shmapChanges, waText, reportText, listText, longText, TILES, S] = [
     "extract", "joinExtras", "parseAttached", "norm", "counts", "units", "inUnit", "longStays", "closedSoon", "shmapChanges", "waText", "reportText", "listText", "longText", "TILES", "S",
