@@ -1,0 +1,36 @@
+# Reference material (real names / personal numbers) — never commit
+reference/
+MASTER_PROMPT.md
+
+# Secrets
+.env*
+!.env.example
+*.json.key
+secrets/
+sa-key*.json
+*-key.json
+service-account*.json
+oauth-client*.json
+
+# Vercel
+.vercel
+
+# Build / deps
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# Test artefacts
+test-results/
+playwright-report/
+e2e/screenshots/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.claude/
