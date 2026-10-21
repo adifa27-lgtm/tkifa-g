@@ -34,3 +34,6 @@ Thumbs.db
 .vscode/
 .idea/
 .claude/
+
+# Local-only checks against the real sheet
+*.local.test.ts

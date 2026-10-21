@@ -2,7 +2,7 @@ import "server-only";
 import type { AppData } from "../core/types";
 import { norm } from "../core/util";
 import { colLetter, fixHeader, q } from "../sheet/a1";
-import { buildData, dataPidCol, headerAt, type Grid } from "../sheet/parse";
+import { buildData, dataPidCol, headerAt, type Grid, type Grids } from "../sheet/parse";
 import { pickTabs, type TabNames } from "../sheet/tabs";
 import type { SheetSource, Values } from "./source";
 
@@ -51,6 +51,12 @@ function zipCols(a: Values | undefined, b: Values | undefined): Grid {
 export async function readAll(src: SheetSource): Promise<AppData> {
   // Version first: if the sheet changes while we read, the next poll sees a newer version.
   const ver = await src.modifiedTime();
+  const { title, grids } = await readGrids(src);
+  return { ver, title, sheetUrl: src.sheetUrl, ...buildData(grids) };
+}
+
+/** The (already minimised) grids the app parses: main tab with a fixed header, 2 DATA columns, other tabs. */
+export async function readGrids(src: SheetSource): Promise<{ title: string; grids: Grids }> {
   const { title, tabs } = await tabsOf(src);
   let dc = tabs.data ? await locateDataCols(src, tabs.data) : null;
 
@@ -84,14 +90,16 @@ export async function readAll(src: SheetSource): Promise<AppData> {
 
   const main = toGrid(vals[0]);
   if (main.length) main[0] = fixHeader(main[0], rawHead?.[0] || []);
-  const built = buildData({
-    main,
-    data,
-    shabzak: idx.shabzak != null ? toGrid(vals[idx.shabzak]) : undefined,
-    attached: idx.attached != null ? toGrid(vals[idx.attached]) : undefined,
-    app: idx.app != null ? toGrid(vals[idx.app]) : undefined,
-  });
-  return { ver, title, sheetUrl: src.sheetUrl, ...built };
+  return {
+    title,
+    grids: {
+      main,
+      data,
+      shabzak: idx.shabzak != null ? toGrid(vals[idx.shabzak]) : undefined,
+      attached: idx.attached != null ? toGrid(vals[idx.attached]) : undefined,
+      app: idx.app != null ? toGrid(vals[idx.app]) : undefined,
+    },
+  };
 }
 
 /** Test hook: forget cached tab names / DATA columns. */

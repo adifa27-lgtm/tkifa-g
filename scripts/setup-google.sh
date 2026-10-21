@@ -10,7 +10,7 @@ PROJECT_FILE=secrets/gcp-project
 if [[ -f $PROJECT_FILE ]]; then
   PROJECT_ID=$(cat "$PROJECT_FILE")
 else
-  PROJECT_ID="tkifa-g-$(LC_ALL=C tr -dc 'a-z0-9' </dev/urandom | head -c 6)"
+  PROJECT_ID="tkifa-g-$(node -e 'process.stdout.write(require("crypto").randomBytes(4).toString("hex").slice(0,6))')"
   echo "$PROJECT_ID" >"$PROJECT_FILE"
 fi
 SA_NAME=tkifa-g-sheets
