@@ -56,15 +56,15 @@ test.describe("views at 375 px", () => {
     await expect(page.locator(".sheet")).toHaveCount(0);
   });
 
-  test("crew + role sheet", async ({ page }) => {
+  test("crew", async ({ page }) => {
     await open(page);
     await openCard(page, 'שבצ"ק רכבים');
     await expect(page.locator("h2")).toHaveText('שבצ"ק רכבים');
     await expect(page.locator(".sectionhead .eyebrow", { hasText: 'מפל"ג' })).toHaveCount(0);
+    await expect(page.locator(".crow button.pk")).toHaveCount(0);
+    await expect(page.locator(".crow", { hasText: "פלג תמיר" }).locator(".badge")).toHaveText('מפק"צ');
+    await expect(page.locator(".crow.leaving", { hasText: "דוד אשל" })).toBeVisible();
     await shot(page, "04-crew");
-    await page.locator(".crow", { hasText: "פלג תמיר" }).locator("button.pk").click();
-    await expect(page.locator(".sheet")).toContainText("תפקיד / פק\"ל");
-    await page.screenshot({ path: `${SHOTS}/05-role-sheet.png` });
   });
 
   test("arrivals and departures", async ({ page }) => {

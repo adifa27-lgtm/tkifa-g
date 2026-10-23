@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ST, STMAP, VEH } from "@/lib/core/constants";
 import { pkClass, segText, stName, type ClosedSoon, type LongStay, type ShmapChange } from "@/lib/core/model";
 import type { Soldier, StatusKey } from "@/lib/core/types";
-import { dayDiff, fmtShort, norm, shift, teamName, todayKey } from "@/lib/core/util";
+import { dayDiff, fmtShort, shift, teamName, todayKey } from "@/lib/core/util";
 import { Back, DateBar, Spin, v } from "./common";
 import type { ViewProps } from "./types";
 
@@ -474,10 +474,12 @@ export function CrewView(p: ViewProps) {
         <div className="who">
           <b>{s.name}</b>
           {m.leaving(s) ? <span className="lv">יוצא הביתה</span> : m.stOf(s) === "post" ? <span className="lv post">מוצב</span> : null}
-          {c && pc !== "mp" && !/מפקצ/.test(norm(r)) ? <span className="badge">מפק&quot;צ</span> : null}
-          <button className={`pk ${pc}`} aria-label={`תפקיד של ${s.name}`} onClick={() => act.setUi({ roleFor: s.id })}>
-            {r ? r : "+ תפקיד"}
-          </button>
+          {c && pc !== "mp" ? <span className="badge">מפק&quot;צ</span> : null}
+          {pc === "med" ? (
+            <span className="medic" title="חובש" aria-label="חובש">
+              ✚
+            </span>
+          ) : null}
         </div>
         <select
           className={`veh ${cur ? "set" : ""}`}
@@ -523,11 +525,11 @@ export function CrewView(p: ViewProps) {
           </span>
         </div>
         <div className="legendrow">
-          <span className="pk mp">מפקד פלוגה</span>
-          <span className="pk cmdr">מפק&quot;צ</span>
-          <span className="pk drv">נהג</span>
-          <span className="pk med">חובש</span>
-          <span className="note">לחיצה על תפקיד משנה אותו</span>
+          <span className="badge">מפק&quot;צ</span>
+          <span className="medic" aria-hidden="true">
+            ✚
+          </span>
+          <span className="note">חובש</span>
         </div>
       </div>
       {groups.length ? (

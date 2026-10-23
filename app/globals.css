@@ -246,3 +246,4 @@ html{-webkit-text-size-adjust:100%}
 .crow.leaving{background:color-mix(in srgb,var(--s-out) 13%,var(--surface));box-shadow:inset -4px 0 0 var(--s-out)}
 .lv{font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px;background:var(--s-out);color:#fff}
 .lv.post{background:var(--s-post)}
+.medic{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:5px;background:#d6334a;color:#fff;font-size:12px;font-weight:700;line-height:1}
