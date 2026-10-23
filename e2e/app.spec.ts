@@ -67,13 +67,14 @@ test.describe("views at 375 px", () => {
     await page.screenshot({ path: `${SHOTS}/05-role-sheet.png` });
   });
 
-  test("attached", async ({ page }) => {
+  test("arrivals and departures", async ({ page }) => {
     await open(page);
-    await openCard(page, "סטטוס מסופחים");
-    await expect(page.locator(".arow")).toHaveCount(5);
-    await page.locator(".fchip", { hasText: "מאושר" }).first().click();
-    await expect(page.locator(".arow")).toHaveCount(1);
-    await shot(page, "06-attached");
+    await expect(page.locator(".unit.wide", { hasText: "סטטוס מסופחים" })).toHaveCount(0);
+    await openCard(page, "מגיעים ויוצאים");
+    await expect(page.locator("h2")).toHaveText("מגיעים ויוצאים");
+    await expect(page.locator(".drill")).toHaveCount(6);
+    await expect(page.locator(".drill").nth(1)).toContainText("דוד אשל");
+    await shot(page, "06-moves");
   });
 
   test("alerts", async ({ page }) => {

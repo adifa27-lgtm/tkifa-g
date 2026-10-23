@@ -125,3 +125,18 @@ describe("attached", () => {
     expect(modelFor(d).attachedLine()).toBe("5 מסופחים · 2 מאושרים · 3 בטיפול");
   });
 });
+
+describe("movesDay (מגיעים ויוצאים)", () => {
+  it("departures are יציאה הביתה; arrivals are בסיס after any other status the day before", () => {
+    const x = modelFor(d).movesDay("2026-10-20");
+    expect(x.out.map((s) => s.name)).toEqual(["דוד אשל"]);
+    expect(x.arr.map((s) => s.name).sort()).toEqual(["אורן גל", "אסף לוטן", "גלעד עמית", "טל ורד", "נדב שלו", "קובי ענבר"].sort());
+    const m = modelFor(d);
+    x.arr.forEach((s) => expect(m.stDay(s, "2026-10-19")).not.toBe("base"));
+  });
+  it("groups by team in team order", () => {
+    const m = modelFor(d);
+    const g = m.byTeam(m.movesDay("2026-10-21").arr);
+    expect(g.map((x) => x.l.length)).toEqual([1, 1, 2]);
+  });
+});

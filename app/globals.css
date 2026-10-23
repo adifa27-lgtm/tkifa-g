@@ -225,3 +225,19 @@ html{-webkit-text-size-adjust:100%}
 .gate .btn.primary{font-size:15px;padding:11px 16px;width:100%}
 .gate form{margin:0}
 [hidden]{display:none!important}
+
+/* 11-day team grid: sticky name column, horizontal scroll */
+.wk{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.wk table{min-width:0;width:auto;font-size:12px}
+.wk th,.wk td{padding:5px 3px;text-align:center}
+.wk th{font-size:11px;line-height:1.25}
+.wk th.today{color:var(--accent);font-weight:700}
+.wk .nm{position:sticky;right:0;z-index:1;background:var(--surface);text-align:start;padding-inline:10px 8px;max-width:130px;overflow:hidden;text-overflow:ellipsis;font-weight:600;font-size:12.5px;box-shadow:-1px 0 0 var(--line)}
+.wk tfoot td{background:var(--surface-2);font-weight:700;color:var(--s-base);border-bottom:0}
+.wk tfoot .nm{background:var(--surface-2);color:var(--fg)}
+.c{position:relative;display:inline-grid;place-items:center;width:28px;height:26px;border-radius:7px;background:color-mix(in srgb,var(--pc) 88%,transparent);color:#fff;font-weight:700;font-size:12.5px}
+.c.none{background:transparent;border:1.5px dashed var(--s-none);color:var(--muted)}
+.c.arr::after{content:"▼";position:absolute;top:-8px;left:-5px;font-size:10px;line-height:1;color:var(--s-base);text-shadow:0 0 2px var(--surface),0 0 2px var(--surface)}
+.wkleg{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px;font-size:12px;color:var(--muted)}
+.wkleg>span{display:inline-flex;align-items:center;gap:5px}
+.wkleg .c{width:20px;height:19px;font-size:11px;border-radius:5px}

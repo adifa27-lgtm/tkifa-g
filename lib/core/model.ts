@@ -6,9 +6,9 @@
  */
 import { ST, STMAP, TILES, VEH, VEHMAP, isStatus } from "./constants";
 import type { AlertsConfig, AttachedRow, RolesConfig, Soldier, StatusKey } from "./types";
-import { dayDiff, flat, fmtDate, fmtShort, norm, shift, teamName } from "./util";
+import { dayDiff, flat, fmtDate, fmtShort, norm, shift, teamName, todayKey } from "./util";
 
-export type View = "home" | "unit" | "summary" | "crew" | "attached" | "long" | "shmap" | "import";
+export type View = "home" | "unit" | "summary" | "crew" | "attached" | "moves" | "long" | "shmap" | "import";
 export type DrillKey = StatusKey | "none";
 
 export interface ModelState {
@@ -58,6 +58,7 @@ export interface ShmapChange {
   to: StatusKey;
 }
 
+export const MOVES_REL = ["היום", "מחר", "מחרתיים"];
 export const LONG_LIMIT = 7;
 export const LOOK_AHEAD = 7;
 const AWAY: Record<string, 1> = { home: 1, tzav: 1, abroad: 1 };
@@ -313,6 +314,42 @@ export function createModel(S: ModelState) {
     return { closed: closed.sort(by), opened: opened.sort(by) };
   }
 
+  /* ---------- מגיעים ויוצאים ---------- */
+  // Departure = "יציאה הביתה" that day. Arrival = בסיס that day after any other status (or none) the day before.
+  function movesDay(d: string): { arr: Soldier[]; out: Soldier[] } {
+    const all = active(roster());
+    return {
+      out: all.filter((s) => stDay(s, d) === "out"),
+      arr: all.filter((s) => stDay(s, d) === "base" && stDay(s, shift(d, -1)) !== "base"),
+    };
+  }
+  function byTeam(list: Soldier[]): { u: Unit; l: Soldier[] }[] {
+    const ids = new Set(list.map((s) => s.id));
+    return units()
+      .map((u) => ({ u, l: active(inUnit(u.k)).filter((s) => ids.has(s.id)) }))
+      .filter((x) => x.l.length);
+  }
+  // "היום · יום שישי 23/10" when the selected date is today, otherwise just the day.
+  function relLabel(i: number, today: string = todayKey()) {
+    const d = shift(S.date, i);
+    const f = fmtDate(d);
+    return (S.date === today ? MOVES_REL[i] + " · " : "") + f.day + " " + fmtShort(d);
+  }
+  function movesWa() {
+    let t = `🚌 *מגיעים ויוצאים – תקיפה ג׳* 🚌\n`;
+    [0, 1, 2].forEach((i) => {
+      const x = movesDay(shift(S.date, i));
+      t += `\n${WA_LINE}\n📅 *${relLabel(i)}*\n`;
+      ([[x.arr, "🟢", "מגיעים לבסיס"], [x.out, "🟠", "יוצאים הביתה"]] as const).forEach(([l, e, n]) => {
+        t += `\n${e} *${n}: ${sold(l.length)}*\n`;
+        byTeam(l).forEach((g) => {
+          t += `${teamEmo(g.u.n)} ${teamName(g.u.n)} (${g.l.length}): ${g.l.map((s) => s.name).join(", ")}\n`;
+        });
+      });
+    });
+    return t + `\n${WA_LINE}`;
+  }
+
   /* ---------- נתוני מ"פ ---------- */
   function listFor(k: DrillKey) {
     return units()
@@ -473,6 +510,8 @@ export function createModel(S: ModelState) {
           ? crewText()
           : v === "attached"
             ? attText()
+            : v === "moves"
+              ? movesWa()
             : v === "long"
               ? longWa()
               : v === "shmap"
@@ -515,6 +554,11 @@ export function createModel(S: ModelState) {
     longLine,
     longText,
     shmapChanges,
+    stDay,
+    movesDay,
+    byTeam,
+    relLabel,
+    movesWa,
     listFor,
     listText,
     tiles,

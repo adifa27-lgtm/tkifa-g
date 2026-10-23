@@ -49,3 +49,8 @@ Short log of choices made while building the app, so nobody has to guess later.
 - Lighthouse removed its PWA category; the same checks (manifest, icons, theme colour, standalone, iOS meta tags, SW, Chrome's own installability errors via CDP) run in `e2e/pwa.spec.ts`.
 - `MOCK_SHEET=1` serves the synthetic fixture with a fake signed-in user (`dev@example.test`). It throws if enabled on Vercel.
 - Node is a portable install at `C:\dev\node` on this machine (no admin rights needed).
+
+## 23/10/2026 — arrivals & departures, team grid
+- Removed the "סטטוס מסופחים" card and view (the sheet tab is still parsed; nothing shows it).
+- New "מגיעים ויוצאים" view: today, +1, +2 from the selected date. Departure = `out` that day. Arrival = `base` that day when the day before was anything other than `base` (including no status). Grouped by team, WhatsApp text for the three days.
+- Team view: an 11-day grid under the roster (status letter per day, ▼ on arrival days, base count per day), sticky name column.

@@ -65,7 +65,6 @@ test("rendered app sends byte-identical WhatsApp texts", async ({ page, browser 
 
   for (const [btn, key] of [
     ["שבצ\"ק רכבים", "crew"],
-    ["סטטוס מסופחים", "attached"],
     ["התראות שבוע קרוב", "long"],
     ["שינויי שמ\"פ היום", "shmap"],
     ["נתוני מ\"פ", "summary"],

@@ -2,7 +2,7 @@
 
 Mobile web app (PWA) for a reserve company's daily manpower picture: who is on base today, team cards,
 status changes written straight into the company's Google Sheet, vehicle assignments (שבצ"ק),
-attached soldiers, 7-day alerts, שמ"פ changes, company summary and ready-to-send WhatsApp reports.
+arrivals & departures (today + 2 days), an 11-day grid per team, 7-day alerts, שמ"פ changes, company summary and ready-to-send WhatsApp reports.
 
 **The Google Sheet is the single source of truth.** The app has no database: it reads the sheet
 through a Google service account and writes single cells back (a daily status, a vehicle, the hidden

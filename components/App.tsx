@@ -2,14 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { STMAP, VEHMAP } from "@/lib/core/constants";
-import { createModel } from "@/lib/core/model";
+import { createModel, type View } from "@/lib/core/model";
 import type { AlertsConfig, AppData, BreakPeriod, Change, ChangesResult, RolesConfig, Soldier, StatusKey, VehKey } from "@/lib/core/types";
 import { ago, norm, shift, todayKey } from "@/lib/core/util";
 import { clearLocalData, getFlag, INSTALL_HIDE_KEY, readCache, setFlag, writeCache } from "@/lib/client/storage";
 import { Spin } from "./common";
 import { RoleSheet, StatusSheet } from "./Sheets";
 import type { Actions, UiState, ViewProps } from "./types";
-import { AttachedView, ConnectView, CrewView, Home, LoadingView, LongView, ShmapView, SummaryView, TeamView } from "./views";
+import { ConnectView, CrewView, Home, LoadingView, LongView, MovesView, ShmapView, SummaryView, TeamView } from "./views";
 
 const POLL_MS = 20000;
 const OFFLINE = "אין חיבור · מוצגים הנתונים האחרונים";
@@ -387,7 +387,8 @@ export default function App({ email, mock, signOut }: { email: string; mock: boo
       mock,
       email,
     };
-    const V = { unit: TeamView, summary: SummaryView, import: ConnectView, crew: CrewView, attached: AttachedView, long: LongView, shmap: ShmapView, home: Home }[ui.view] || Home;
+    const views: Partial<Record<View, (p: ViewProps) => React.ReactNode>> = { unit: TeamView, summary: SummaryView, import: ConnectView, crew: CrewView, moves: MovesView, long: LongView, shmap: ShmapView, home: Home };
+    const V = views[ui.view] || Home;
     body = <V {...p} />;
     try {
       waText = model.waText();

@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { ST, STMAP, VEH } from "@/lib/core/constants";
-import { attTone, pkClass, segText, stName, type ClosedSoon, type LongStay, type ShmapChange } from "@/lib/core/model";
+import { pkClass, segText, stName, type ClosedSoon, type LongStay, type ShmapChange } from "@/lib/core/model";
 import type { Soldier, StatusKey } from "@/lib/core/types";
-import { dayDiff, fmtShort, norm, shift, teamName } from "@/lib/core/util";
+import { dayDiff, fmtShort, norm, shift, teamName, todayKey } from "@/lib/core/util";
 import { Back, DateBar, Spin, v } from "./common";
 import type { ViewProps } from "./types";
 
@@ -82,6 +82,7 @@ export function Home(p: ViewProps) {
   const longs = m.longStays(ui.date);
   const closed = m.closedSoon(ui.date);
   const sh = m.shmapChanges();
+  const mv = m.movesDay(ui.date);
   return (
     <>
       <header className="top">
@@ -163,10 +164,12 @@ export function Home(p: ViewProps) {
           </div>
           <span className="chev">‹</span>
         </button>
-        <button className="unit mp wide" onClick={() => act.go("attached", { attFilter: null })}>
+        <button className="unit mp wide" onClick={() => act.go("moves")}>
           <div>
-            <div className="nm">סטטוס מסופחים</div>
-            <div className="sub num">{m.attachedLine()}</div>
+            <div className="nm">מגיעים ויוצאים</div>
+            <div className="sub num">
+              {ui.date === todayKey() ? "היום" : "ביום הזה"}: {mv.arr.length} מגיעים · {mv.out.length} יוצאים הביתה
+            </div>
           </div>
           <span className="chev">‹</span>
         </button>
@@ -303,6 +306,155 @@ export function TeamView(p: ViewProps) {
           </>
         ) : null}
       </div>
+      {la.length ? <WeekGrid p={p} list={la} /> : null}
+    </>
+  );
+}
+
+/* ---------------- שבוע וחצי קדימה (team grid) ---------------- */
+const WK_DAYS = 11;
+const WK_LET: Record<StatusKey, string> = { base: "ב", home: "ה", out: "י", tzav: "צ", abroad: "ח", org: "ת" };
+const DAY_LET = ["א", "ב", "ג", "ד", "ה", "ו", "ש"];
+
+function WeekGrid({ p, list }: { p: ViewProps; list: Soldier[] }) {
+  const { m, ui } = p;
+  const ds = Array.from({ length: WK_DAYS }, (_, i) => shift(ui.date, i));
+  const tk = todayKey();
+  return (
+    <>
+      <div className="sectionhead">
+        <span className="eyebrow">שבוע וחצי קדימה</span>
+        <span className="note num">
+          {fmtShort(ds[0])}–{fmtShort(ds[ds.length - 1])}
+        </span>
+      </div>
+      <div className="wk">
+        <table>
+          <thead>
+            <tr>
+              <th className="nm">חייל</th>
+              {ds.map((d) => {
+                const [y, mo, dd] = d.split("-").map(Number);
+                return (
+                  <th key={d} className={d === tk ? "today" : ""}>
+                    {DAY_LET[new Date(y, mo - 1, dd).getDay()]}
+                    <br />
+                    <span className="num">
+                      {dd}/{mo}
+                    </span>
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {list.map((s) => (
+              <tr key={s.id}>
+                <td className="nm">{s.name}</td>
+                {ds.map((d) => {
+                  const k = m.stDay(s, d);
+                  const st = k ? STMAP[k] : null;
+                  const arr = k === "base" && m.stDay(s, shift(d, -1)) !== "base";
+                  return (
+                    <td key={d}>
+                      {st && k ? (
+                        <span className={`c ${arr ? "arr" : ""}`} style={{ "--pc": v(st.c) } as React.CSSProperties} title={st.n + (arr ? " · מגיע לבסיס" : "")}>
+                          {WK_LET[k]}
+                        </span>
+                      ) : (
+                        <span className="c none">·</span>
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td className="nm">בבסיס</td>
+              {ds.map((d) => (
+                <td key={d} className="num">
+                  {list.filter((s) => m.stDay(s, d) === "base").length}
+                </td>
+              ))}
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div className="wkleg">
+        {ST.map((x) => (
+          <span key={x.k}>
+            <span className="c" style={{ "--pc": v(x.c) } as React.CSSProperties}>
+              {WK_LET[x.k]}
+            </span>
+            {x.k === "abroad" ? 'חו"ל' : x.n}
+          </span>
+        ))}
+        <span>
+          <span className="c arr" style={{ "--pc": v("--s-base") } as React.CSSProperties}>
+            ב
+          </span>
+          מגיע לבסיס
+        </span>
+      </div>
+    </>
+  );
+}
+
+/* ---------------- מגיעים ויוצאים ---------------- */
+export function MovesView(p: ViewProps) {
+  const { m, ui, data, act } = p;
+  const group = (list: Soldier[], k: StatusKey, title: string, empty: string) => (
+    <section className="drill" style={{ "--pc": v(STMAP[k].c) } as React.CSSProperties}>
+      <div className="dh">
+        <h3>
+          {title} · <span className="num">{list.length}</span>
+        </h3>
+      </div>
+      {list.length ? (
+        m.byTeam(list).map((g) => (
+          <div key={g.u.k} className="dg">
+            <div className="dgt">
+              {teamName(g.u.n)} <span className="num">{g.l.length}</span>
+            </div>
+            <div className="names">
+              {g.l.map((s) => (
+                <span key={s.id}>{s.name}</span>
+              ))}
+            </div>
+          </div>
+        ))
+      ) : (
+        <div className="note">{empty}</div>
+      )}
+    </section>
+  );
+  return (
+    <>
+      <Back act={act} />
+      <div className="viewhead">
+        <h2>מגיעים ויוצאים</h2>
+        <DateBar date={ui.date} events={data.events} act={act} />
+        <p className="note" style={{ margin: 0 }}>
+          יוצאים = &quot;יציאה הביתה&quot; באותו יום. מגיעים = בבסיס באותו יום, אחרי כל סטטוס אחר ביום שלפני.
+        </p>
+      </div>
+      {[0, 1, 2].map((i) => {
+        const x = m.movesDay(shift(ui.date, i));
+        return (
+          <div key={i}>
+            <div className="sectionhead">
+              <span className="eyebrow num">{m.relLabel(i)}</span>
+              <span className="note num">
+                {x.arr.length} מגיעים · {x.out.length} יוצאים
+              </span>
+            </div>
+            {group(x.arr, "base", "מגיעים לבסיס", "אף אחד לא מגיע")}
+            {group(x.out, "out", "יוצאים הביתה", "אף אחד לא יוצא")}
+          </div>
+        );
+      })}
     </>
   );
 }
@@ -389,58 +541,6 @@ export function CrewView(p: ViewProps) {
         ))
       ) : (
         <div className="empty">אין חיילים בבסיס ביום הזה.</div>
-      )}
-    </>
-  );
-}
-
-/* ---------------- סטטוס מסופחים ---------------- */
-export function AttachedView(p: ViewProps) {
-  const { m, ui, act } = p;
-  const a = m.S.attached || [];
-  const by = m.attachedByStatus();
-  const list = m.attachedList();
-  const f = ui.attFilter;
-  return (
-    <>
-      <Back act={act} />
-      <div className="viewhead">
-        <h2>סטטוס מסופחים</h2>
-        <p className="note" style={{ margin: 0 }}>
-          מסופחים לתקיפה ג&apos; בלבד, מלשונית &quot;מסופחים&quot; בשיט.
-        </p>
-        {a.length ? (
-          <div className="chips">
-            {by.map(([k, n]) => (
-              <button key={k} className={`chip fchip ${f === k ? "on" : ""} t-${attTone(k)}`} onClick={() => act.setUi({ attFilter: f === k ? null : k })}>
-                {k} <b className="num">{n}</b>
-              </button>
-            ))}
-          </div>
-        ) : null}
-      </div>
-      {a.length ? (
-        <div className="roster">
-          {list.map((r, i) => (
-            <div key={i} className="arow">
-              <div className="who">
-                <b>{r.name}</b>
-                <span className="note2">{[r.role, r.unit].filter(Boolean).join(" · ")}</span>
-                {r.phone ? (
-                  <span className="phone num" dir="ltr">
-                    {r.phone}
-                  </span>
-                ) : null}
-              </div>
-              <div className="aside">
-                {r.purpose ? <span className="tag">{r.purpose}</span> : null}
-                <span className={`st t-${attTone(r.status)}`}>{r.status || "ללא סטטוס"}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="empty">אין מסופחים לתקיפה ג&apos; בלשונית &quot;מסופחים&quot; בשיט.</div>
       )}
     </>
   );
