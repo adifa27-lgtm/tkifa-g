@@ -313,7 +313,7 @@ export function TeamView(p: ViewProps) {
 
 /* ---------------- שבוע וחצי קדימה (team grid) ---------------- */
 const WK_DAYS = 11;
-const WK_LET: Record<StatusKey, string> = { base: "ב", home: "ה", out: "י", tzav: "צ", abroad: "ח", org: "ת" };
+const WK_LET: Record<StatusKey, string> = { base: "ב", home: "ה", out: "י", tzav: "צ", abroad: "ח", org: "ת", loc: "א" };
 const DAY_LET = ["א", "ב", "ג", "ד", "ה", "ו", "ש"];
 
 function WeekGrid({ p, list }: { p: ViewProps; list: Soldier[] }) {

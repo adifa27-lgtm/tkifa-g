@@ -12,7 +12,7 @@ const names = (l: { s: { name: string } }[]) => l.map((x) => x.s.name);
 describe("counts", () => {
   it("counts statuses for 20/10", () => {
     const m = modelFor(d);
-    expect(m.counts(m.roster())).toEqual({ none: 2, base: 23, tzav: 1, org: 1, out: 1, home: 7, abroad: 2 });
+    expect(m.counts(m.roster())).toEqual({ none: 2, base: 23, tzav: 1, org: 1, out: 1, home: 7, abroad: 2, loc: 0 });
     expect(m.reportText()).toContain("בבסיס: 23 מתוך 36 בשירות");
   });
 });

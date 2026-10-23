@@ -13,6 +13,7 @@ export function statusOf(v: unknown): StatusKey | null {
   const t = norm(v);
   if (!t) return null;
   if (t === "1") return "base";
+  if (t.includes("איתור")) return "loc";
   if (t.includes("צו סגור")) return "tzav";
   if (t.includes("חול")) return "abroad";
   if (t.includes("התארגנות")) return "org";
