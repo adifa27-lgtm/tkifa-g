@@ -470,9 +470,10 @@ export function CrewView(p: ViewProps) {
     const c = m.isCmd(s);
     const cur = m.vehOf(s);
     return (
-      <div key={s.id} className={`crow ${c ? "cmd" : ""} ${pc === "mp" ? "lead" : ""}`}>
+      <div key={s.id} className={`crow ${c ? "cmd" : ""} ${pc === "mp" ? "lead" : ""} ${m.leaving(s) ? "leaving" : ""}`}>
         <div className="who">
           <b>{s.name}</b>
+          {m.leaving(s) ? <span className="lv">יוצא הביתה</span> : m.stOf(s) === "post" ? <span className="lv post">מוצב</span> : null}
           {c && pc !== "mp" && !/מפקצ/.test(norm(r)) ? <span className="badge">מפק&quot;צ</span> : null}
           <button className={`pk ${pc}`} aria-label={`תפקיד של ${s.name}`} onClick={() => act.setUi({ roleFor: s.id })}>
             {r ? r : "+ תפקיד"}
@@ -508,7 +509,7 @@ export function CrewView(p: ViewProps) {
         <h2>שבצ&quot;ק רכבים</h2>
         <DateBar date={ui.date} events={data.events} act={act} />
         <p className="note" style={{ margin: 0 }}>
-          החיילים שבבסיס ביום הזה, בלי מפל&quot;ג. השיבוץ נכתב מיד בלשונית שבצ&quot;ק בשיט.
+          החיילים שבבסיס, במוצב או ביציאה הביתה ביום הזה, בלי מפל&quot;ג. שורה כתומה = יוצא הביתה היום ויהיה מחוץ ללופ. השיבוץ נכתב מיד בלשונית שבצ&quot;ק בשיט.
         </p>
         <div className="vehsum">
           {VEH.map((o) => (
@@ -534,13 +535,15 @@ export function CrewView(p: ViewProps) {
           <div key={x.u.k}>
             <div className="sectionhead">
               <span className="eyebrow">{teamName(x.u.n)}</span>
-              <span className="note num">{x.l.length} בבסיס</span>
+              <span className="note num">
+                {x.l.length} בשבצ&quot;ק{x.l.some(m.leaving) ? ` · ${x.l.filter(m.leaving).length} יוצאים` : ""}
+              </span>
             </div>
             <div className="roster">{x.l.map(row)}</div>
           </div>
         ))
       ) : (
-        <div className="empty">אין חיילים בבסיס ביום הזה.</div>
+        <div className="empty">אין חיילים בשבצ&quot;ק ביום הזה.</div>
       )}
     </>
   );

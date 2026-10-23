@@ -241,3 +241,8 @@ html{-webkit-text-size-adjust:100%}
 .wkleg{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px;font-size:12px;color:var(--muted)}
 .wkleg>span{display:inline-flex;align-items:center;gap:5px}
 .wkleg .c{width:20px;height:19px;font-size:11px;border-radius:5px}
+
+/* שבצ"ק: soldier leaving home today (still listed, out of the loop from tomorrow) */
+.crow.leaving{background:color-mix(in srgb,var(--s-out) 13%,var(--surface));box-shadow:inset -4px 0 0 var(--s-out)}
+.lv{font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px;background:var(--s-out);color:#fff}
+.lv.post{background:var(--s-post)}

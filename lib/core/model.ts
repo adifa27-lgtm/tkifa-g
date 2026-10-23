@@ -157,11 +157,15 @@ export function createModel(S: ModelState) {
 
   /* ---------- crew (vehicles) ---------- */
   const vehOf = (s: Soldier) => s.sheetVeh || "";
-  const crewPool = () => active(roster()).filter((s) => !isMafleg(s.unit) && stOf(s) === "base");
+  // שבצ"ק pool: בסיס, מוצב, and יציאה הביתה (still here today, leaving — marked in the UI).
+  const CREW_ST: Record<string, 1> = { base: 1, post: 1, out: 1 };
+  const crewPool = () => active(roster()).filter((s) => !isMafleg(s.unit) && !!CREW_ST[stOf(s) as string]);
+  const leaving = (s: Soldier) => stOf(s) === "out";
   function crewSummaryLine() {
     const p = crewPool();
     const n = p.filter((s) => vehOf(s)).length;
-    return `${p.length} בבסיס · ${n} משובצים`;
+    const o = p.filter(leaving).length;
+    return `${p.length} בשבצ"ק · ${n} משובצים${o ? ` · ${o} יוצאים הביתה` : ""}`;
   }
   const crewRank = (s: Soldier) => (isLead(s) ? 10 + leadRank(roleOf(s)) : isCmd(s) ? 1 : 0);
   function crewGroups(): { u: Unit; l: Soldier[] }[] {
@@ -170,7 +174,7 @@ export function createModel(S: ModelState) {
       .filter((u) => !isMafleg(u.n))
       .map((u) => ({
         u,
-        l: pool.filter((s) => norm(s.unit) === u.k).sort((a, b) => crewRank(b) - crewRank(a) || (a.order ?? 0) - (b.order ?? 0)),
+        l: pool.filter((s) => norm(s.unit) === u.k).sort((a, b) => Number(leaving(a)) - Number(leaving(b)) || crewRank(b) - crewRank(a) || (a.order ?? 0) - (b.order ?? 0)),
       }));
   }
   function vehCounts() {
@@ -435,7 +439,7 @@ export function createModel(S: ModelState) {
     return waMsg({ icon: ST_EMO[k] || "📋", title: `${name} – תקיפה ג׳`, total: `סה״כ ${name}`, groups: teamGroups(listFor(k)) });
   }
   function crewText() {
-    return waMsg({ icon: "🚨", title: "שבצ״ק רכבים – תקיפה ג׳", groups: teamGroups(crewGroups(), (s) => `${who(s)} | ${VEHMAP[vehOf(s)]?.n || "לא שובץ"}`) });
+    return waMsg({ icon: "🚨", title: "שבצ״ק רכבים – תקיפה ג׳", groups: teamGroups(crewGroups(), (s) => `${who(s)} | ${VEHMAP[vehOf(s)]?.n || "לא שובץ"}${leaving(s) ? " | 🟠 יוצא הביתה" : ""}`) });
   }
   function attText() {
     const l = attachedList();
@@ -543,6 +547,7 @@ export function createModel(S: ModelState) {
     crewPool,
     crewGroups,
     crewSummaryLine,
+    leaving,
     vehCounts,
     attachedLine,
     attachedByStatus,

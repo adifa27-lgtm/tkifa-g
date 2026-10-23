@@ -114,8 +114,9 @@ describe("crew", () => {
   it('excludes מפל"ג and anyone not on base', () => {
     const m = modelFor(d);
     expect(m.crewPool().some((s) => s.unit === 'מפל"ג')).toBe(false);
-    expect(m.crewPool().every((s) => m.stOf(s) === "base")).toBe(true);
-    expect(m.crewSummaryLine()).toMatch(/^\d+ בבסיס · \d+ משובצים$/);
+    expect(m.crewPool().every((s) => ["base", "post", "out"].includes(m.stOf(s) as string))).toBe(true);
+    expect(m.crewPool().some((s) => m.stOf(s) === "out")).toBe(true);
+    expect(m.crewSummaryLine()).toMatch(/^\d+ בשבצ"ק · \d+ משובצים( · \d+ יוצאים הביתה)?$/);
   });
 });
 
