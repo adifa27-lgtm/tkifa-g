@@ -1,4 +1,4 @@
-export type StatusKey = "base" | "tzav" | "org" | "out" | "home" | "abroad" | "loc";
+export type StatusKey = "base" | "tzav" | "org" | "out" | "home" | "abroad" | "post";
 export type VehKey = "898" | "506" | "497" | "207" | "savana" | "berlingo" | "private";
 
 /** One soldier as sent to the client. Never contains sensitive DATA-tab columns. */

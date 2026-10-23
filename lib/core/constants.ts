@@ -14,7 +14,7 @@ export const ST: StatusDef[] = [
   { k: "out", n: "יציאה הביתה", c: "--s-out" },
   { k: "home", n: "בבית", c: "--s-home" },
   { k: "abroad", n: 'חו"ל שמ"פ סגור', c: "--s-abroad" },
-  { k: "loc", n: "איתור", c: "--s-loc" },
+  { k: "post", n: "מוצב", c: "--s-post" },
 ];
 export const STMAP: Record<string, StatusDef> = Object.fromEntries(ST.map((s) => [s.k, s]));
 export const isStatus = (v: unknown): v is StatusKey => typeof v === "string" && v in STMAP;
@@ -44,7 +44,7 @@ export const STATUS_SHEET: Record<StatusKey | "", string> = {
   tzav: "צו סגור",
   org: "התארגנות",
   abroad: 'חו"ל  - שמ"פ סגור',
-  loc: "איתור ", // matches the sheet's dropdown option, trailing space included
+  post: "מוצב",
   "": "",
 };
 
@@ -73,4 +73,4 @@ export const ROLE_PRESETS = [
   "קשר",
 ];
 
-export const TILES: StatusKey[] = ["base", "home", "out", "tzav", "org", "abroad", "loc"];
+export const TILES: StatusKey[] = ["base", "home", "out", "tzav", "org", "abroad", "post"];

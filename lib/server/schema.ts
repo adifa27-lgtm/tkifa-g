@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const status = z.enum(["base", "home", "out", "tzav", "org", "abroad", "loc", ""]);
+const status = z.enum(["base", "home", "out", "tzav", "org", "abroad", "post", ""]);
 const veh = z.enum(["898", "506", "497", "207", "savana", "berlingo", "private", ""]);
 const name = z.string().min(1).max(120);
 const pid = z.string().max(20).optional();

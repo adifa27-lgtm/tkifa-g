@@ -63,7 +63,6 @@ export const LONG_LIMIT = 7;
 export const LOOK_AHEAD = 7;
 const AWAY: Record<string, 1> = { home: 1, tzav: 1, abroad: 1 };
 const CLOSED: Record<string, 1> = { tzav: 1, abroad: 1 };
-const shmapSt = (v: StatusKey | null): StatusKey | null => (v === "loc" ? null : v);
 const LEAD: [RegExp, number][] = [
   [/^(מפ|מפקד פלוגה)$/, 3],
   [/^(סמפ|סגן מפקד פלוגה)$/, 2],
@@ -71,7 +70,7 @@ const LEAD: [RegExp, number][] = [
 ];
 
 export const WA_LINE = "━━━━━━━━━━━━━━";
-export const ST_EMO: Record<string, string> = { base: "🟢", tzav: "⚪", org: "🔵", out: "🟠", home: "🏠", abroad: "✈️", loc: "🔎", none: "❔" };
+export const ST_EMO: Record<string, string> = { base: "🟢", tzav: "⚪", org: "🔵", out: "🟠", home: "🏠", abroad: "✈️", post: "🗼", none: "❔" };
 const TEAM_EMO = ["🔵", "🟢", "🟠", "🟣", "🟤", "🔴", "🟡"];
 const ATT_EMO: Record<string, string> = { ok: "✅", bad: "❌", wait: "⏳", none: "❔" };
 
@@ -305,9 +304,8 @@ export function createModel(S: ModelState) {
     const closed: ShmapChange[] = [];
     const opened: ShmapChange[] = [];
     active(roster()).forEach((s) => {
-      // איתור doesn't count either way for שמ"פ: treated like no status.
-      const a = shmapSt(stDay(s, y));
-      const b = shmapSt(stDay(s, S.date));
+      const a = stDay(s, y);
+      const b = stDay(s, S.date);
       if (!b) return;
       if (CLOSED[b] && a && !CLOSED[a]) closed.push({ s, from: a, to: b });
       else if (!CLOSED[b] && (!a || CLOSED[a])) opened.push({ s, from: a, to: b });
