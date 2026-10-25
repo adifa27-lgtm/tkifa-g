@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ST, STMAP, VEH } from "@/lib/core/constants";
-import { pkClass, segText, stName, type ClosedSoon, type LongStay, type ShmapChange } from "@/lib/core/model";
+import { here, hereLabel, pkClass, segText, stName, type ClosedSoon, type LongStay, type ShmapChange } from "@/lib/core/model";
 import type { Soldier, StatusKey } from "@/lib/core/types";
 import { dayDiff, fmtShort, shift, teamName, todayKey } from "@/lib/core/util";
 import { Back, DateBar, Spin, v } from "./common";
@@ -93,11 +93,11 @@ export function Home(p: ViewProps) {
       {p.mock ? <div className="banner" style={{ margin: "0 0 10px" }}>מצב בדיקה: נתונים בדויים, לא הגיליון האמיתי.</div> : null}
       <DateBar date={ui.date} events={data.events} act={act} />
       <section className="hero" aria-label="חיילים בבסיס">
-        <span className="lbl">חיילים בבסיס</span>
+        <span className="lbl">חיילים {hereLabel(c)}</span>
         <div className="big num">
-          <b>{c.base}</b>
+          <b>{here(c)}</b>
           <span>
-            מתוך {total - c.tzav} בשירות{c.tzav ? ` · ${c.tzav} צו סגור` : ""}
+            מתוך {total - c.tzav} בשירות{c.post ? ` · ${c.base} בבסיס · ${c.post} במוצב` : ""}{c.tzav ? ` · ${c.tzav} צו סגור` : ""}
           </span>
         </div>
         <div className="stack">
@@ -127,14 +127,14 @@ export function Home(p: ViewProps) {
           const l = m.inUnit(u.k);
           const la = m.active(l);
           const cc = m.counts(l);
-          const sub = [cc.home ? `${cc.home} בבית` : "", cc.out ? `${cc.out} יציאה` : "", cc.tzav ? `${cc.tzav} צו סגור` : ""].filter(Boolean).join(" · ") || " ";
+          const sub = [cc.post ? `${cc.post} במוצב` : "", cc.home ? `${cc.home} בבית` : "", cc.out ? `${cc.out} יציאה` : "", cc.tzav ? `${cc.tzav} צו סגור` : ""].filter(Boolean).join(" · ") || " ";
           return (
             <button key={u.k} className="unit" onClick={() => act.go("unit", { unit: u.k })}>
               <div className="nm">{teamName(u.n)}</div>
               <div className="cnt num">
-                <b>{cc.base}</b>
+                <b>{here(cc)}</b>
                 <span>/{la.length}</span>
-                <small>בבסיס</small>
+                <small>{hereLabel(cc)}</small>
               </div>
               <div className="prog" aria-hidden="true">
                 {ST.map((s) => (cc[s.k] ? <i key={s.k} style={{ width: `${(cc[s.k] / la.length) * 100}%`, background: v(s.c) }} /> : null))}
@@ -372,10 +372,10 @@ function WeekGrid({ p, list }: { p: ViewProps; list: Soldier[] }) {
           </tbody>
           <tfoot>
             <tr>
-              <td className="nm">בבסיס</td>
+              <td className="nm">בבסיס+מוצב</td>
               {ds.map((d) => (
                 <td key={d} className="num">
-                  {list.filter((s) => m.stDay(s, d) === "base").length}
+                  {list.filter((s) => { const k = m.stDay(s, d); return k === "base" || k === "post"; }).length}
                 </td>
               ))}
             </tr>

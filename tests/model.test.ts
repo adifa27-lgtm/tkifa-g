@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import type { AppData } from "@/lib/core/types";
-import { leadRank, pkClass, attTone } from "@/lib/core/model";
+import { leadRank, pkClass, attTone, here, hereLabel } from "@/lib/core/model";
 import { fixtureData, modelFor } from "./helpers";
 
 let d: AppData;
@@ -139,5 +139,17 @@ describe("movesDay (מגיעים ויוצאים)", () => {
     const m = modelFor(d);
     const g = m.byTeam(m.movesDay("2026-10-21").arr);
     expect(g.map((x) => x.l.length)).toEqual([1, 1, 2]);
+  });
+});
+
+describe("present count (base + outpost)", () => {
+  const z = { none: 0, base: 0, tzav: 0, org: 0, out: 0, home: 0, abroad: 0, post: 0 };
+  it("adds outpost soldiers to the base count", () => {
+    expect(here({ ...z, base: 20, post: 5 })).toBe(25);
+    expect(hereLabel({ ...z, base: 20, post: 5 })).toBe("בבסיס ובמוצב");
+  });
+  it("keeps the plain base label when nobody is at the outpost", () => {
+    expect(here({ ...z, base: 20 })).toBe(20);
+    expect(hereLabel({ ...z, base: 20 })).toBe("בבסיס");
   });
 });

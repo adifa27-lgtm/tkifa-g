@@ -8,6 +8,11 @@ import { ST, STMAP, TILES, VEH, VEHMAP, isStatus } from "./constants";
 import type { AlertsConfig, AttachedRow, RolesConfig, Soldier, StatusKey } from "./types";
 import { dayDiff, flat, fmtDate, fmtShort, norm, shift, teamName, todayKey } from "./util";
 
+/** Present = on base + at the outpost (מוצב). */
+export const here = (c: Record<StatusKey | "none", number>) => c.base + (c.post || 0);
+/** Label for the present count: "בבסיס ובמוצב" when anyone is at the outpost. */
+export const hereLabel = (c: Record<StatusKey | "none", number>) => (c.post ? "בבסיס ובמוצב" : "בבסיס");
+
 export type View = "home" | "unit" | "summary" | "crew" | "attached" | "moves" | "long" | "shmap" | "import";
 export type DrillKey = StatusKey | "none";
 
@@ -378,17 +383,17 @@ export function createModel(S: ModelState) {
     const act = active(all);
     const c = counts(all);
     const f = fmtDate(S.date);
-    let t = `כוח אדם תקיפה ג' גדס"ר\n${f.day} ${f.short}\n\nבבסיס: ${c.base} מתוך ${act.length - c.tzav} בשירות\n`;
+    let t = `כוח אדם תקיפה ג' גדס"ר\n${f.day} ${f.short}\n\n${hereLabel(c)}: ${here(c)} מתוך ${act.length - c.tzav} בשירות\n`;
     ST.slice(1).forEach((s) => {
       if (c[s.k]) t += `${s.n}: ${c[s.k]}\n`;
     });
     if (c.none) t += `ללא סטטוס: ${c.none}\n`;
     if (confirmed(all) < act.length) t += `(אושרו במפקדים ${confirmed(all)} מתוך ${act.length}, השאר לפי תכנון השיט)\n`;
-    t += "\nבבסיס לפי צוות:\n";
+    t += `\n${hereLabel(c)} לפי צוות:\n`;
     units().forEach((u) => {
       const l = inUnit(u.k);
       const cc = counts(l);
-      t += `${teamName(u.n)}: ${cc.base}/${active(l).length}\n`;
+      t += `${teamName(u.n)}: ${here(cc)}/${active(l).length}\n`;
     });
     return t.trim();
   }
@@ -488,16 +493,16 @@ export function createModel(S: ModelState) {
     const all = roster();
     const act = active(all);
     const c = counts(all);
-    let t = `📊 *דוח כוח אדם – תקיפה ג׳ גדס״ר* 📊\n📅 ${waDate()}\n\n👥 *סה״כ כוח: ${sold(act.length)}*\n🟢 *בבסיס: ${c.base}* מתוך ${act.length - c.tzav} בשירות\n\n${WA_LINE}\n\n*לפי סטטוס*\n`;
+    let t = `📊 *דוח כוח אדם – תקיפה ג׳ גדס״ר* 📊\n📅 ${waDate()}\n\n👥 *סה״כ כוח: ${sold(act.length)}*\n🟢 *${hereLabel(c)}: ${here(c)}* מתוך ${act.length - c.tzav} בשירות\n\n${WA_LINE}\n\n*לפי סטטוס*\n`;
     ST.slice(1).forEach((s) => {
       if (c[s.k]) t += `${ST_EMO[s.k]} ${s.n}: ${c[s.k]}\n`;
     });
     if (c.none) t += `${ST_EMO.none} ללא סטטוס: ${c.none}\n`;
-    t += `\n*בבסיס לפי צוות*\n`;
+    t += `\n*${hereLabel(c)} לפי צוות*\n`;
     units().forEach((u) => {
       const l = inUnit(u.k);
       const cc = counts(l);
-      t += `${teamEmo(u.n)} ${teamName(u.n)}: ${cc.base}/${active(l).length}\n`;
+      t += `${teamEmo(u.n)} ${teamName(u.n)}: ${here(cc)}/${active(l).length}\n`;
     });
     if (confirmed(all) < act.length) t += `\n_אושרו במפקדים ${confirmed(all)} מתוך ${act.length}, השאר לפי תכנון השיט_\n`;
     return t + `\n${WA_LINE}`;
