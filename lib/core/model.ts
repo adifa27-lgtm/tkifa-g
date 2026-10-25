@@ -13,6 +13,9 @@ export const here = (c: Record<StatusKey | "none", number>) => c.base + (c.post 
 /** Label for the present count: "בבסיס ובמוצב" when anyone is at the outpost. */
 export const hereLabel = (c: Record<StatusKey | "none", number>) => (c.post ? "בבסיס ובמוצב" : "בבסיס");
 
+/** On base or at the outpost. */
+export const isPresent = (k: StatusKey | null | undefined) => k === "base" || k === "post";
+
 export type View = "home" | "unit" | "summary" | "crew" | "attached" | "moves" | "long" | "shmap" | "import";
 export type DrillKey = StatusKey | "none";
 
@@ -324,12 +327,12 @@ export function createModel(S: ModelState) {
   }
 
   /* ---------- מגיעים ויוצאים ---------- */
-  // Departure = "יציאה הביתה" that day. Arrival = בסיס that day after any other status (or none) the day before.
+  // Departure = "יציאה הביתה" that day. Arrival = present (בסיס or מוצב) that day after not being present the day before.
   function movesDay(d: string): { arr: Soldier[]; out: Soldier[] } {
     const all = active(roster());
     return {
       out: all.filter((s) => stDay(s, d) === "out"),
-      arr: all.filter((s) => stDay(s, d) === "base" && stDay(s, shift(d, -1)) !== "base"),
+      arr: all.filter((s) => isPresent(stDay(s, d)) && !isPresent(stDay(s, shift(d, -1)))),
     };
   }
   function byTeam(list: Soldier[]): { u: Unit; l: Soldier[] }[] {
@@ -349,7 +352,7 @@ export function createModel(S: ModelState) {
     [0, 1, 2].forEach((i) => {
       const x = movesDay(shift(S.date, i));
       t += `\n${WA_LINE}\n📅 *${relLabel(i)}*\n`;
-      ([[x.arr, "🟢", "מגיעים לבסיס"], [x.out, "🟠", "יוצאים הביתה"]] as const).forEach(([l, e, n]) => {
+      ([[x.arr, "🟢", "מגיעים לבסיס/מוצב"], [x.out, "🟠", "יוצאים הביתה"]] as const).forEach(([l, e, n]) => {
         t += `\n${e} *${n}: ${sold(l.length)}*\n`;
         byTeam(l).forEach((g) => {
           t += `${teamEmo(g.u.n)} ${teamName(g.u.n)} (${g.l.length}): ${g.l.map((s) => s.name).join(", ")}\n`;

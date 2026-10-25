@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import type { AppData } from "@/lib/core/types";
-import { leadRank, pkClass, attTone, here, hereLabel } from "@/lib/core/model";
+import { leadRank, pkClass, attTone, here, hereLabel, isPresent } from "@/lib/core/model";
 import { fixtureData, modelFor } from "./helpers";
 
 let d: AppData;
@@ -151,5 +151,14 @@ describe("present count (base + outpost)", () => {
   it("keeps the plain base label when nobody is at the outpost", () => {
     expect(here({ ...z, base: 20 })).toBe(20);
     expect(hereLabel({ ...z, base: 20 })).toBe("בבסיס");
+  });
+});
+
+describe("isPresent (arrivals count base and outpost)", () => {
+  it("treats בסיס and מוצב as present", () => {
+    expect(isPresent("base")).toBe(true);
+    expect(isPresent("post")).toBe(true);
+    expect(isPresent("home")).toBe(false);
+    expect(isPresent(null)).toBe(false);
   });
 });

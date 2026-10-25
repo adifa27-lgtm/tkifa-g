@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ST, STMAP, VEH } from "@/lib/core/constants";
-import { here, hereLabel, pkClass, segText, stName, type ClosedSoon, type LongStay, type ShmapChange } from "@/lib/core/model";
+import { here, hereLabel, isPresent, pkClass, segText, stName, type ClosedSoon, type LongStay, type ShmapChange } from "@/lib/core/model";
 import type { Soldier, StatusKey } from "@/lib/core/types";
 import { dayDiff, fmtShort, shift, teamName, todayKey } from "@/lib/core/util";
 import { Back, DateBar, Spin, v } from "./common";
@@ -354,11 +354,11 @@ function WeekGrid({ p, list }: { p: ViewProps; list: Soldier[] }) {
                 {ds.map((d) => {
                   const k = m.stDay(s, d);
                   const st = k ? STMAP[k] : null;
-                  const arr = k === "base" && m.stDay(s, shift(d, -1)) !== "base";
+                  const arr = isPresent(k) && !isPresent(m.stDay(s, shift(d, -1)));
                   return (
                     <td key={d}>
                       {st && k ? (
-                        <span className={`c ${arr ? "arr" : ""}`} style={{ "--pc": v(st.c) } as React.CSSProperties} title={st.n + (arr ? " · מגיע לבסיס" : "")}>
+                        <span className={`c ${arr ? "arr" : ""}`} style={{ "--pc": v(st.c) } as React.CSSProperties} title={st.n + (arr ? " · מגיע לבסיס/מוצב" : "")}>
                           {WK_LET[k]}
                         </span>
                       ) : (
@@ -395,7 +395,7 @@ function WeekGrid({ p, list }: { p: ViewProps; list: Soldier[] }) {
           <span className="c arr" style={{ "--pc": v("--s-base") } as React.CSSProperties}>
             ב
           </span>
-          מגיע לבסיס
+          מגיע לבסיס/מוצב
         </span>
       </div>
     </>
@@ -437,7 +437,7 @@ export function MovesView(p: ViewProps) {
         <h2>מגיעים ויוצאים</h2>
         <DateBar date={ui.date} events={data.events} act={act} />
         <p className="note" style={{ margin: 0 }}>
-          יוצאים = &quot;יציאה הביתה&quot; באותו יום. מגיעים = בבסיס באותו יום, אחרי כל סטטוס אחר ביום שלפני.
+          יוצאים = &quot;יציאה הביתה&quot; באותו יום. מגיעים = בבסיס או במוצב באותו יום, אחרי יום שלא היו בבסיס או במוצב.
         </p>
       </div>
       {[0, 1, 2].map((i) => {
@@ -450,7 +450,7 @@ export function MovesView(p: ViewProps) {
                 {x.arr.length} מגיעים · {x.out.length} יוצאים
               </span>
             </div>
-            {group(x.arr, "base", "מגיעים לבסיס", "אף אחד לא מגיע")}
+            {group(x.arr, "base", "מגיעים לבסיס/מוצב", "אף אחד לא מגיע")}
             {group(x.out, "out", "יוצאים הביתה", "אף אחד לא יוצא")}
           </div>
         );
